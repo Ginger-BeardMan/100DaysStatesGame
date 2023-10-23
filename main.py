@@ -15,6 +15,9 @@ game_is_on = True
 
 locations = pandas.read_csv("50_states.csv")
 
+states_list = locations.state.to_list()
+states_dict = {'States': []}
+
 correct_states = 0
 
 while game_is_on:
@@ -23,11 +26,18 @@ while game_is_on:
 
     current_answer = locations[locations.state == f"{answer_state}"]
 
+    if answer_state == 'Exit':
+        states_dict['States'] = states_list
+        missed_states = pandas.DataFrame(states_dict)
+        missed_states.to_csv('states_to_learn.csv')
+        break
+
     if locations['state'].eq(answer_state).any():
         locator.goto(int(current_answer.x), int(current_answer.y))
         locator.write(f"{answer_state}")
         correct_states += 1
         screen.title(f"{correct_states}/50 States Correct")
+        states_list.pop(answer_state)
 
         if correct_states == 50:
             locator.goto(0, 0)
@@ -37,6 +47,7 @@ while game_is_on:
     else:
         locator.goto(0, 0)
         locator.write(f"Game Over. {correct_states}/50 Answered Correctly")
+        states_dict['States'] = states_list
+        missed_states = pandas.DataFrame(states_dict)
+        missed_states.to_csv('states_to_learn.csv')
         game_is_on = False
-
-screen.exitonclick()
